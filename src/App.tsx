@@ -1,41 +1,13 @@
-import React, { useState, useRef, useEffect, FC } from 'react';
-
-interface BoxProps {
-  index: number;
-}
-
-const Box: React.FC<BoxProps> = ({ index }) => {
-  const [x, setX] = useState(0);
-  const intervalRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    intervalRef.current = window.setInterval(() => {
-      setX(x => x + 1);
-    }, 16);
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, []);
-
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        width: 100,
-        height: 100,
-        backgroundColor: 'red',
-        left: x + index * 50,
-      }}
-    />
-  );
-};
+import React, { useState, useEffect, FC } from 'react';
+import Box from './Box';
 
 const App: FC = () => {
   const [color, setColor] = useState('white');
   const [hdrSupport, setHdrSupport] = useState(false);
   const [wideGamutSupport, setWideGamutSupport] = useState(false);
+  const [frameInterval, setFrameInterval] = useState(16);
+
+  const intervalsInFPS = [ 165, 144, 120, 60, 30, 24, 20 ]
 
   useEffect(() => {
     // Check if the user's display supports HDR
@@ -60,9 +32,18 @@ const App: FC = () => {
       }}
     >
       {Array.from({ length: 1 }, (_, i) => (
-        <Box key={i} index={i} />
+        <Box key={i} frameRate={frameInterval} />
       ))}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <select
+          onChange={e => {
+            setFrameInterval(parseInt(e.target.value));
+          }}
+        >
+          { intervalsInFPS.map((fps, i) => (
+            <option key={i} value={fps}>{fps}</option>
+          )) }
+        </select>
         <button
           onClick={() => {
             setColor(c => {
